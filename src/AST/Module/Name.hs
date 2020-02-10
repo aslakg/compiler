@@ -13,8 +13,10 @@ data Canonical = Canonical
     { _package :: Package.Name
     , _module :: Raw
     }
-    deriving (Eq, Ord, Show)
+    deriving (Eq, Ord)
 
+instance Show Canonical where
+  show c = "\"" ++  canonicalToString c ++ "\""
 
 inVirtualDom :: Raw -> Canonical
 inVirtualDom raw =

@@ -50,6 +50,12 @@ treeToExpr name decisionTree allJumps =
     (choices, maybeJumps) =
         unzip (map (createChoices targetCounts) allJumps)
   in
+   if True then
+     Opt.PlainCase
+       name
+       allJumps
+       decisionTree -- Aslak added this
+  else
       Opt.Case
         name
         (insertChoices (Map.fromList choices) decider)
@@ -170,4 +176,3 @@ insertChoices choiceDict decider =
 
       Opt.FanOut path tests fallback ->
           Opt.FanOut path (map (second go) tests) (go fallback)
-

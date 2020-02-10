@@ -1,4 +1,4 @@
-module Generate.JavaScript (generate) where
+module Generate.JavaScript (generate, generateUnoptimized) where
 
 import qualified Control.Monad.State as State
 import qualified Data.Text.Lazy as LazyText
@@ -16,10 +16,26 @@ import qualified Generate.JavaScript.Variable as Var
 
 
 -- GENERATE JAVASCRIPT
-
+generateUnoptimized d =
+  LazyText.pack $ show d
 
 generate :: Module.Optimized -> LazyText.Text
-generate (Module.Module moduleName _ info) =
+generate mm =
+  let
+    (Module.Module moduleName _ info) = mm
+    genBody =
+      do  defsList <- mapM JS.generateDef (Module.program info)
+          let managerStmts = generateEffectManager moduleName (Module.effects info)
+          return (concat (defsList ++ [managerStmts]))
+
+    body =
+      State.evalState genBody 0
+  in
+    --JS.stmtsToText body
+    LazyText.pack $ show (Module.program info)
+
+generate2 :: Module.Optimized -> LazyText.Text
+generate2 (Module.Module moduleName _ info) =
   let
     genBody =
       do  defsList <- mapM JS.generateDef (Module.program info)

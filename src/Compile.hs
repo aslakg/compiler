@@ -1,4 +1,4 @@
-module Compile (compile) where
+module Compile (compile, compileUnoptimized) where
 
 import qualified Data.Map as Map
 
@@ -72,6 +72,31 @@ compile packageName canonicalImports interfaces source =
       return $ canonicalModule { Module.info = info }
 
 
+compileUnoptimized packageName canonicalImports interfaces source =
+  do
+      -- Parse the source code
+      validModule <-
+          Result.format Error.Syntax $
+            Parse.program packageName (getOpTable interfaces) source
+
+      -- Canonicalize all variables, pinning down where they came from.
+      canonicalModule <-
+          Canonicalize.module' canonicalImports interfaces validModule
+
+      -- Run type inference on the program.
+      types <-
+          Result.from Error.Type $
+            TI.infer interfaces canonicalModule
+
+      -- One last round of checks
+      canonicalDefs <-
+          Result.format Error.Type $
+            Nitpick.topLevelTypes types $
+              Can.toSortedDefs (Module.program (Module.info canonicalModule))
+
+
+      return $ canonicalDefs
+      
 getOpTable :: Module.Interfaces -> Parse.OpTable
 getOpTable interfaces =
   Map.elems interfaces

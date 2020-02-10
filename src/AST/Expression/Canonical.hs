@@ -28,7 +28,8 @@ type Expr' =
 data Def
     = Def R.Region Pattern.Canonical Expr (Maybe (A.Located Type.Canonical))
 
-
+instance Show Def where
+  show (Def reg can e x) = show e
 
 -- SORTED DEFS
 

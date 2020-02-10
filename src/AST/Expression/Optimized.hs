@@ -8,6 +8,7 @@ module AST.Expression.Optimized
 import qualified AST.Expression.General as Expr
 import qualified AST.Literal as Literal
 import qualified AST.Module.Name as ModuleName
+import qualified AST.Pattern as P
 import qualified AST.Type as Type
 import qualified AST.Variable as Var
 import qualified Optimize.DecisionTree as DT
@@ -20,12 +21,17 @@ import qualified Reporting.Region as R
 data Def
     = Def Facts String Expr
     | TailDef Facts String [String] Expr
-
+    deriving (Show)
 
 data Facts = Facts
     { home :: Maybe ModuleName.Canonical
     }
-
+--  deriving (Show)
+instance Show Facts where
+  show f =
+    case (home f) of
+      Just c -> "(Just " ++ show c ++ ")"
+      Nothing -> "Nothing"
 
 dummyFacts :: Facts
 dummyFacts =
@@ -45,6 +51,8 @@ data Expr
     | If [(Expr, Expr)] Expr
     | Let [Def] Expr
     | Case String (Decider Choice) [(Int, Expr)]
+    | PlainCase String [(Int, Expr)] (DT.DecisionTree)
+    | ElmCase Expr [(P.OPattern Var.Canonical, Expr)]
     | Data String [Expr]
     | DataAccess Expr Int
     | Access Expr String
@@ -57,23 +65,24 @@ data Expr
     | Program (Expr.Main Type.Canonical) Expr
     | GLShader String String Literal.GLShaderTipe
     | Crash ModuleName.Canonical R.Region (Maybe Expr)
-
+  deriving (Show)
 
 data Decider a
     = Leaf a
     | Chain
-        { _testChain :: [(DT.Path, DT.Test)]
-        , _success :: Decider a
-        , _failure :: Decider a
+        { testChain :: [(DT.Path, DT.Test)]
+        , success :: Decider a
+        , failure :: Decider a
         }
     | FanOut
-        { _path :: DT.Path
-        , _tests :: [(DT.Test, Decider a)]
-        , _fallback :: Decider a
+        { path :: DT.Path
+        , tests :: [(DT.Test, Decider a)]
+        , fallback :: Decider a
         }
-    deriving (Eq)
+    deriving (Show,Eq)
 
 
 data Choice
     = Inline Expr
     | Jump Int
+ deriving (Show)

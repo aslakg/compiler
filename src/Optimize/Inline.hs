@@ -150,7 +150,9 @@ count expression =
                   Map.unionsWith (+) (map countDecider (fallback : map snd tests))
         in
           Map.unionsWith (+) (countDecider decider : map (count . snd) jumps)
-
+    ElmCase e branches ->
+       --  Map.unionWith (+) (count e) (countMany (map (count . snd) branches))
+       Map.empty
     Data _tag values ->
         countMany values
 

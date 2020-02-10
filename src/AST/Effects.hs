@@ -15,6 +15,8 @@ data Effects pkg ports
   | Manager pkg Info
   | Port ports
 
+instance Show (Effects a b) where
+  show e = "<effects>" -- Aslak
 
 type Raw =
   Effects () [A.Commented PortRaw]

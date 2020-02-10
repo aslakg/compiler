@@ -10,7 +10,7 @@ import qualified Reporting.Region as R
 
 data Annotated annotation a
     = A annotation a
-
+  deriving (Show)
 
 type Located a =
     Annotated R.Region a
@@ -51,4 +51,3 @@ map f (A annotation value) =
 drop :: Annotated info a -> a
 drop (A _ value) =
     value
-

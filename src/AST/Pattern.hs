@@ -21,7 +21,25 @@ data Pattern' ann var
     | Var String
     | Anything
     | Literal L.Literal
+ deriving (Show)
 
+data OPattern var
+  = OData var [OPattern var]
+  | ORecord [String]
+  | OAlias String (OPattern var)
+  | OVar String
+  | OAnything
+  | OLiteral L.Literal
+ deriving (Show)
+
+convPattern (A.A a d) =
+   case d of
+     Data v pats -> OData v (map convPattern pats)
+     Record x -> ORecord x
+     Alias a p -> OAlias a (convPattern p)
+     Var s -> OVar s
+     Anything -> OAnything
+     Literal l -> OLiteral l
 
 type Raw =
     Pattern R.Region Var.Raw

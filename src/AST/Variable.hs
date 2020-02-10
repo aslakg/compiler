@@ -24,7 +24,7 @@ data Home
     | Module ModuleName.Canonical
     | TopLevel ModuleName.Canonical
     | Local
-    deriving (Eq, Ord)
+    deriving (Show, Eq, Ord)
 
 
 data Canonical = Canonical
@@ -187,7 +187,8 @@ instance ToString Canonical where
         Local ->
             name
 
-
+instance Show Canonical where
+  show c = "\"" ++ toString c ++ "\""
 
 -- LISTINGS
 

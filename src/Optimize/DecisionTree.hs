@@ -69,11 +69,11 @@ type VariantDict =
 data DecisionTree
     = Match Int
     | Decision
-        { _test :: Path
-        , _edges :: [(Test, DecisionTree)]
-        , _default :: Maybe DecisionTree
+        { test_ :: Path
+        , edges_ :: [(Test, DecisionTree)]
+        , default_ :: Maybe DecisionTree
         }
-    deriving (Eq)
+    deriving (Show,Eq)
 
 
 data Test
@@ -81,13 +81,16 @@ data Test
     | Literal L.Literal
     deriving (Eq, Ord)
 
+instance Show Test where
+  show (Constructor v) = "Constructor (" ++ show v ++ ")"
+  show (Literal l) = "TestLiteral (" ++ show l ++ ")"
 
 data Path
     = Position Int Path
     | Field String Path
     | Empty
     | Alias
-    deriving (Eq)
+    deriving (Show, Eq)
 
 
 -- PATH HELPERS

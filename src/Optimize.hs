@@ -252,8 +252,14 @@ optimizeExpr context annExpr@(A.A region expression) =
 
             name <- Env.freshName
             optBranches <- T.traverse (optimizeBranch context region name) branches
+            myBranches <- T.traverse (\(p,x) ->
+               do
+                 x <- optimizeExpr Nothing x
+                 pure (P.convPattern p, x)
+                 ) branches
             let optCase = Case.optimize variantDict name optBranches
-            return $ Opt.Let [ Opt.Def Opt.dummyFacts name optExpr ] optCase
+            --return $ Opt.Let [ Opt.Def Opt.dummyFacts name optExpr ] optCase
+            return $ Opt.ElmCase optExpr myBranches --(fmap (\(p,x) -> (P.convPattern p, optimizeExpr Nothing x)) branches)
 
     Expr.Data name exprs ->
         Opt.Data name <$> T.traverse justConvert exprs

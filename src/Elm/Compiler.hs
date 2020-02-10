@@ -106,11 +106,13 @@ compile context source interfaces =
     (Result.Result oneLocalizer warnings answer) =
       do  modul <- Compile.compile packageName dependencies interfaces source
           docs <- Result.format Error.Docs (docsGen isExposed modul)
-
+          unop <- Compile.compileUnoptimized packageName dependencies interfaces source
           let interface = Module.toInterface packageName modul
-          let javascript = JS.generate modul
-
-          return (Result docs interface javascript)
+          let javascript1 = JS.generate modul
+          let javascript = JS.generateUnoptimized unop
+{- Okay so here I have an opportunity to perhaps grab the types of definitions from the
+ unoptimized version, and use it to produce a type overview somehow, somewhere -}
+          return (Result docs interface javascript1)
   in
     ( Result.oneToValue dummyLocalizer Localizer oneLocalizer
     , Bag.toList Warning warnings
@@ -202,5 +204,3 @@ printWarning handle (Localizer localizer) location source (Warning (A.A region w
 warningToJson :: Localizer -> String -> Warning -> Json.Value
 warningToJson (Localizer localizer) location (Warning wrn) =
     Warning.toJson localizer location wrn
-
-
