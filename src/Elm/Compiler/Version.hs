@@ -2,13 +2,14 @@
 module Elm.Compiler.Version (version) where
 
 import qualified Data.Version as Version
-import qualified Paths_elm_compiler as This
+-- import qualified Paths_elm_compiler as This
 import Elm.Package (Version(Version))
 
 
 rawVersion :: [Int]
 rawVersion =
-    Version.versionBranch This.version
+    -- Version.versionBranch This.version
+    [0,18,1]
 
 
 version :: Version

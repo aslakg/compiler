@@ -5,3 +5,5 @@ cabal-dev
 cabal.sandbox.config
 .DS_Store
 *~
+travis.log
+.stack-work

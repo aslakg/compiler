@@ -36,14 +36,13 @@ data LocalVars =
     , _tags :: Set.Set String
     }
 
+instance Semigroup LocalVars where
+  (LocalVars i1 d1 t1) <> (LocalVars i2 d2 t2) =
+    LocalVars (Set.union i1 i2) (Set.union d1 d2) (Set.union t1 t2)
 
 instance Monoid LocalVars where
   mempty =
     LocalVars Set.empty Set.empty Set.empty
-
-  mappend (LocalVars i1 d1 t1) (LocalVars i2 d2 t2) =
-    LocalVars (Set.union i1 i2) (Set.union d1 d2) (Set.union t1 t2)
-
 
 addTag :: String -> a -> R.Result LocalVars w e a
 addTag name value =

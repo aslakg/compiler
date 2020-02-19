@@ -163,11 +163,8 @@ instance (Monoid i) => Monad (Result i w e) where
                   rawResult'
 
 
-instance Monoid (One a) where
-  mempty =
-    None
-
-  mappend left right =
+instance Semigroup (One a) where
+  left <> right =
     case (left, right) of
       (other, None) ->
         other
@@ -177,3 +174,7 @@ instance Monoid (One a) where
 
       (One _, One _) ->
         error "There should only be one!"
+        
+instance Monoid (One a) where
+  mempty =
+    None
