@@ -19,7 +19,7 @@ import qualified Reporting.Render.Type as RenderType
 import qualified Reporting.Result as Result
 import qualified Reporting.Warning as Warning
 import qualified Type.Inference as TI
-
+import AST.Type
 
 
 type Result =
@@ -72,6 +72,8 @@ compile packageName canonicalImports interfaces source =
       return $ canonicalModule { Module.info = info }
 
 
+--compileUnoptimized :: Package.Name -> [ModuleName.Canonical] -> Module.Interfaces -> String -> Result.Result (Result.One RenderType.Localizer) Warning.Warning Error.Error [Can.Def]
+compileUnoptimized :: Package.Name -> [ModuleName.Canonical] -> Module.Interfaces -> String -> Result.Result (Result.One RenderType.Localizer) Warning.Warning Error.Error (Map.Map String Canonical, [Can.Def])
 compileUnoptimized packageName canonicalImports interfaces source =
   do
       -- Parse the source code
@@ -84,19 +86,19 @@ compileUnoptimized packageName canonicalImports interfaces source =
           Canonicalize.module' canonicalImports interfaces validModule
 
       -- Run type inference on the program.
-      types <-
+      (types :: Map.Map String AST.Type.Canonical) <-
           Result.from Error.Type $
             TI.infer interfaces canonicalModule
 
       -- One last round of checks
-      canonicalDefs <-
-          Result.format Error.Type $
-            Nitpick.topLevelTypes types $
-              Can.toSortedDefs (Module.program (Module.info canonicalModule))
-
-
-      return $ canonicalDefs
       
+      (ret :: [Can.Def]) <- Result.format Error.Type $
+               Nitpick.topLevelTypes types $
+                Can.toSortedDefs (Module.program (Module.info canonicalModule))
+
+      return (types, ret)
+
+
 getOpTable :: Module.Interfaces -> Parse.OpTable
 getOpTable interfaces =
   Map.elems interfaces

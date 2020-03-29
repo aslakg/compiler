@@ -33,7 +33,7 @@ import qualified Reporting.Render.Type as RenderType
 import qualified Reporting.Report as Report
 import qualified Reporting.Result as Result
 import qualified Reporting.Warning as Warning
-
+import qualified ASKoka
 
 
 -- VERSION
@@ -106,13 +106,15 @@ compile context source interfaces =
     (Result.Result oneLocalizer warnings answer) =
       do  modul <- Compile.compile packageName dependencies interfaces source
           docs <- Result.format Error.Docs (docsGen isExposed modul)
-          unop <- Compile.compileUnoptimized packageName dependencies interfaces source
+          (types, unop) <- Compile.compileUnoptimized packageName dependencies interfaces source
           let interface = Module.toInterface packageName modul
-          let javascript1 = JS.generate modul
-          let javascript = JS.generateUnoptimized unop
+              javascript1 = JS.generate modul
+              javascript2 = JS.generateUnoptimized unop
+              javascript :: LazyText.Text
+              javascript = ASKoka.generateKoka types modul unop source interfaces
 {- Okay so here I have an opportunity to perhaps grab the types of definitions from the
  unoptimized version, and use it to produce a type overview somehow, somewhere -}
-          return (Result docs interface javascript1)
+          return (Result docs interface javascript)
   in
     ( Result.oneToValue dummyLocalizer Localizer oneLocalizer
     , Bag.toList Warning warnings
